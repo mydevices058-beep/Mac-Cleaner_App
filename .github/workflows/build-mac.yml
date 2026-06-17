@@ -1,0 +1,39 @@
+name: Build Mac App
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch: # ကိုယ်တိုင် Manual ခိုင်းစေနိုင်ရန်
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install PyInstaller
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller
+
+    - name: Build Mac App with PyInstaller
+      run: |
+        pyinstaller --noconfirm --onefile --windowed cleaner.py
+
+    - name: Zip the Application (Permission မပျက်စေရန်)
+      run: |
+        cd dist
+        zip -r MacCleaner-App.zip cleaner.app
+
+    - name: Upload Output File
+      uses: actions/upload-artifact@v4
+      with:
+        name: MacCleaner-Release
+        path: dist/MacCleaner-App.zip
